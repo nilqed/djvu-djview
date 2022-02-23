@@ -8,6 +8,7 @@ qlgenerator_la_SOURCES = \
 
 qlgenerator_la_OBJCFLAGS = -w
 qlgenerator_la_CFLAGS = ${DDJVUAPI_CFLAGS}
+qlgenerator_la_OBJCFLAGS = ${DDJVUAPI_CFLAGS}
 qlgenerator_la_LIBADD = ${DDJVUAPI_LIBS} 
 
 qlgenerator_la_LDFLAGS = -module -avoid-version \

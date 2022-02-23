@@ -46,6 +46,13 @@
 #include <QString>
 #include <QStringList>
 #include <QTranslator>
+#if QT_VERSION >= 0x60000
+# define reReplace(s,r,a) (r).replaceIn((s),(a))
+# define reIndex(s,r,p) (r).indexIn((s),(p))
+#else
+# define reReplace(s,r,a) (s).replace((r),(a))
+# define reIndex(s,r,p) (s).indexOf((r),(p))
+#endif
 
 #if defined(Q_OS_WIN32)
 # include <mbctype.h>
@@ -139,7 +146,7 @@ QDjViewApplication::QDjViewApplication(int &argc, char **argv)
 #endif
   
   // Enable highdpi pixmaps
-#if QT_VERSION >= 0x50200
+#if QT_VERSION >= 0x50200 && QT_VERSION < 0x60000
   setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 #endif
   
@@ -214,7 +221,11 @@ QDjViewApplication::getTranslationDirs()
       addDirectory(dirs, dirPath + "/../../share/djview4");
       addDirectory(dirs, "/usr/share/djvu/djview4");
       addDirectory(dirs, "/usr/share/djview4");
+#if QT_VERSION >= 0x60000
+      addDirectory(dirs, QLibraryInfo::path(QLibraryInfo::TranslationsPath));
+#else
       addDirectory(dirs, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+#endif
       translationDirs = dirs;
     }
   return translationDirs;
@@ -272,7 +283,7 @@ static bool loadOneTranslator(QTranslator *trans,
   QString llang = lang.toLower();
   foreach (QString dir, dirs)
     {
-      dir = dir.replace(QRegExp("\\$LANG(?!\\w)"), lang);
+      dir = reReplace(dir, QRegExp("\\$LANG(?!\\w)"), lang);
       QDir qdir(dir);
       if (qdir.exists())
         {
@@ -493,7 +504,7 @@ main(int argc, char *argv[])
   while (qi < qargv.size() && qargv.at(qi)[0] == '-')
     {
       QString arg = qargv.at(qi);
-      arg.replace(QRegExp("^-+"),"");
+      arg = reReplace(arg, QRegExp("^-+"),"");
       QString key = arg.section(QChar('='),0,1);
       if (arg == "help")
         usage();
@@ -515,7 +526,7 @@ main(int argc, char *argv[])
     {
       QString name = qargv.at(qi);
       bool okay = true;
-      if (name.contains(QRegExp("^[a-zA-Z]{3,8}:/")))
+      if (reIndex(name, QRegExp("^[a-zA-Z]{3,8}:/"), 0) >= 0)
         okay = main->open(QUrl(name));
       else
         okay = main->open(name);

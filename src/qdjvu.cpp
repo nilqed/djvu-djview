@@ -41,8 +41,16 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVector>
+#include <QMutex>
 #if QT_VERSION >= 0x50000
 # include <QUrlQuery>
+#endif
+#if QT_VERSION >= 0x60000
+# include <QRecursiveMutex>
+#else
+class QRecursiveMutex: public QMutex {
+  QRecursiveMutex() : QMutex(QMutex::Recursive) { }
+};
 #endif
 #if DDJVUAPI_VERSION < 17
 # error "DDJVUAPI_VERSION>=17 is required !"
@@ -221,7 +229,7 @@ class QDjVuDocumentPrivate : public QObject
 {
   Q_OBJECT
 public:
-  QMutex mutex;
+  QRecursiveMutex mutex;
   bool autoDelete;
   int refCount;
   QSet<QObject*> running;
@@ -246,7 +254,7 @@ signals:
 };
 
 QDjVuDocumentPrivate::QDjVuDocumentPrivate()
-  : mutex(QMutex::Recursive),
+  : mutex(),
     autoDelete(false), 
     refCount(0),
     docReady(false), 

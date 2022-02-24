@@ -223,7 +223,7 @@ struct my_event_filter_t : public QAbstractNativeEventFilter
 #if QT_VERSION >= 0x60000
   virtual bool nativeEventFilter(const QByteArray &type, void *msg, qintptr*);
 #else
-  virtual bool nativeEventFilter(const QByteArray &type, void *msg, qintptr*);
+  virtual bool nativeEventFilter(const QByteArray &type, void *msg, long*);
 #endif
   QMap<quint32,QDjViewPlugin::Instance*> instances;
   QMap<quint32,my_timer_object_t*> timers;

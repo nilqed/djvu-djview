@@ -49,6 +49,7 @@
 # include <QRecursiveMutex>
 #else
 class QRecursiveMutex: public QMutex {
+public:
   QRecursiveMutex() : QMutex(QMutex::Recursive) { }
 };
 #endif

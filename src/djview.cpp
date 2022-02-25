@@ -280,15 +280,32 @@ QDjViewApplication::getTranslationLangs()
 static bool loadOneTranslator(QTranslator *trans, 
                               QString name, QString lang, QStringList dirs)
 {
-  QString llang = lang.toLower();
   foreach (QString dir, dirs)
     {
-      dir = reReplace(dir, QRegExp("\\$LANG(?!\\w)"), lang);
-      QDir qdir(dir);
-      if (qdir.exists())
+      QRegExp relang = QRegExp("\\$LANG(?!\\w)");
+      QString llang = lang.toLower();
+      if (reIndex(dir, relang, 0) >= 0) {
+	QString delims = "-_.";
+	QString d = reReplace(dir, relang, llang);
+	while (! QDir(d).exists() ) {
+	  int k = -1;
+	  for (int i=0; i<(int)delims.length(); i++) {
+	    int j = llang.lastIndexOf(delims[i]);
+	    if (j > k)
+	      k = j;
+	  }
+	  if (k > 0)
+	    llang.truncate(k);
+	  else
+	    break;
+	}
+	dir = reReplace(dir, relang, llang);
+      }
+      if (QDir(dir).exists())
         {
           if (trans->load(name + "_" + lang, dir, "_.-"))
             return true;
+	  QString llang = lang.toLower();
           if (lang != llang && trans->load(name + "_" + llang, dir, "_.-"))
             return true;
         }
@@ -303,14 +320,17 @@ QDjViewApplication::loadTranslators(QStringList langs,
   QStringList dirs = getTranslationDirs();
   foreach (QString lang, langs)
     {
-      bool okay = true;
-      if (okay && dTrans && !loadOneTranslator(dTrans, "djview", lang, dirs))
-        okay = false;
-      if (okay && qTrans && !loadOneTranslator(qTrans, "qt", lang, dirs))
-        okay = false;
-      if (okay || lang.startsWith("en_") || lang == "en")
-        return okay;
+      if (dTrans && dTrans->isEmpty())
+	loadOneTranslator(dTrans, "djview", lang, dirs);
+      if (qTrans && qTrans->isEmpty())
+	loadOneTranslator(qTrans, "qt", lang, dirs);
+      if (!(dTrans && dTrans->isEmpty()) && !(qTrans && qTrans->isEmpty()))
+	return true;
+      if (lang.startsWith("en_") || lang == "en")
+        break;
     }
+  if (dTrans && !dTrans->isEmpty())
+    return true;
   return false;
 }
 

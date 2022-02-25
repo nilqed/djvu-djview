@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dmgname="DjVuLibre-3.5.28+DjView-4.12-intel64-3"
+dmgname="DjVuLibre-3.5.28+DjView-4.12-universal-1"
 
 cd $(dirname $0)
 if ! test -d DjView.app ; then
@@ -28,5 +28,5 @@ run cp -r DjView.app $dmg || exit
 run cp ReadMe.rtf $dmg || exit
 book=DjView.app/Contents/share/doc/djvu/djvulibre-book-en.djvu
 run ln -s $book $dmg/Manual.djvu || exit
-run hdiutil create -ov -srcfolder $dmg -volname "$dmgname" "$dmgname".dmg || exit
+run hdiutil create -ov -srcfolder $dmg -volname "$dmgname" -format UDZO "$dmgname".dmg || exit
 run rm -rf $dmg

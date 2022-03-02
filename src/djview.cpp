@@ -149,6 +149,11 @@ QDjViewApplication::QDjViewApplication(int &argc, char **argv)
 #if QT_VERSION >= 0x50200 && QT_VERSION < 0x60000
   setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 #endif
+
+  // Tooltip opacity
+#if QT_VERSION >= 0x60000
+  setStyleSheet("QToolTip {opacity: 250;}");
+#endif
   
   // Wire session management signals
   connect(this, SIGNAL(saveStateRequest(QSessionManager&)),
